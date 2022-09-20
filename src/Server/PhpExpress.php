@@ -35,14 +35,41 @@ class PhpExpress {
         };
     }
 
+    public function use(\Closure $middleware) {
+        return $this->middleware($middleware);
+    }
+
     public function middleware(\Closure $middleware) {
         $this->middlewares[] = $middleware;
     }
 
+    // public function next() {
+    //     // foreach ($this->middlewares as $middleware) {
+    //     //     yield $middleware;
+    //     // }
+
+    //     return next($this->middlewares);
+    // }
+
     protected function runMiddlewares() {
-        foreach ($this->middlewares as $middleware) {
-            $middleware($this->request, $this->response);
+        if(count($this->middlewares) === 0) {
+            return false;
         }
+
+        // print_r($this->middlewares);
+
+        $middleware = current($this->middlewares);
+        $middlewares = $this->middlewares;
+
+        $middleware($this->request, $this->response, function(&$req, &$res, \Closure $_next) use (&$middlewares) {
+            $next = next($middlewares);
+
+            if($next === false) {
+                return;
+            }
+
+            return $next($req, $res, $_next);
+        });
     }
 
     public function run() {

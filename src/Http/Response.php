@@ -6,6 +6,8 @@ class Response {
     public function __construct($statusCode=200) {
         $this->response = '';
         $this->headerSent = false;
+        $this->responseSent = false;
+        $this->headers = [];
         $this->status = $statusCode;
     }
 
@@ -25,7 +27,17 @@ class Response {
         $this->sendStatus();
         $this->sendHeaders();
 
+        $this->responseSent = true;
+
         echo $this->response;
+    }
+
+    public function isSent() {
+        return $this->responseSent;
+    }
+
+    public function areHeadersSent() {
+        return $this->headerSent;
     }
 
     public function status(int $statusCode) {
@@ -48,6 +60,18 @@ class Response {
         $this->headers = [...$this->headers, ...$headers];
 
         return $this;
+    }
+
+    public function text(string $data) {
+        $this->header('Content-Type', 'text/plain; charset=utf-8');
+
+        $this->send($data);
+    }
+
+    public function xml(string $data) {
+        $this->header('Content-Type', 'application/xml; charset=utf-8');
+
+        $this->send($data);
     }
 
     public function html(string $data) {

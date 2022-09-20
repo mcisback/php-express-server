@@ -6,7 +6,19 @@ class Request {
     public function __construct($phpRequest) {
         $this->req = $phpRequest;
         $this->_headers = getallheaders();
-        $this->_wantsjson = str_contains($this->_headers['Content-Type'], 'application/json');
+        $this->_isJson = str_contains($this->_headers['Content-Type'], 'application/json');
+        $this->_wantsjson = str_contains($this->_headers['Accept'], 'application/json');
+
+        if($this->_isJson) {
+            // takes raw data from the request 
+            $json = file_get_contents('php://input');
+            // Converts it into a PHP object 
+            $this->req = json_decode($json, true);
+        }
+    }
+
+    public function isJson() {
+        return $this->_isJson;
     }
 
     public function wantsJson() {

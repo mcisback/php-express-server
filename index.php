@@ -5,6 +5,17 @@ require_once __DIR__ . '/vendor/autoload.php';
 
 $app = new Mcisback\PhpExpress\Server\PhpExpress($_SERVER, $_REQUEST);
 
+$cors = function (&$req, &$res, \Closure $next) {
+    $res->headers([
+        "Access-Control-Allow-Origin" => "*",
+        "Access-Control-Allow-Headers" => "*",
+    ]);
+
+    $next($req, $res, $next);
+};
+
+$app->use($cors);
+
 $app->get('/hello_json', function($req, $res) {
     return $res->json([
         'message' => 'Hello, World'
