@@ -19,7 +19,7 @@ $app->use($cors);
 $app->get('/hello_json', function($req, $res) {
     return $res->json([
         'message' => 'Hello, World',
-        'query_string' => $req->query('param1'),
+        'query_string' => $req->query(),
     ]);
 });
 

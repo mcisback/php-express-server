@@ -7,10 +7,6 @@ use Mcisback\PhpExpress\Http\Response;
 
 class PhpExpress {
     function __construct($server, $request) {
-        // $this->isSSL = ($server['HTTPS'] ?? 'off') == 'off';
-
-        
-
         $this->host = $server['HTTP_HOST'];
         $this->server = $server;
         $this->middlewares = [];
@@ -23,11 +19,11 @@ class PhpExpress {
             'head' => [],
         ];
 
-        $requestUrl = ($this->isSSL() ? 'https://' : 'http://') . $this->host . $_SERVER['REQUEST_URI'];
+        $this->url = (object) parse_url(
+            ($this->isSSL() ? 'https://' : 'http://') . $this->host . $this->server['REQUEST_URI']
+        );
 
-        $this->url = (object) parse_url($requestUrl);
-
-        $this->request = new Request($request, $this->url->query);
+        $this->request = new Request($request, $this->url->query ?? '');
         $this->response = new Response();
     }
 
@@ -58,30 +54,6 @@ class PhpExpress {
             return $this->dispatch($method, ...$args);
         }
     }
-
-    // public function get(string $route, \Closure $callback) {
-    //     return $this->dispatch('get', $route, $callback);
-    // }
-
-    // public function post(string $route, \Closure $callback) {
-    //     return $this->dispatch('post', $route, $callback);
-    // }
-
-    // public function patch(string $route, \Closure $callback) {
-    //     return $this->dispatch('patch', $route, $callback);
-    // }
-
-    // public function put(string $route, \Closure $callback) {
-    //     return $this->dispatch('put', $route, $callback);
-    // }
-
-    // public function delete(string $route, \Closure $callback) {
-    //     return $this->dispatch('delete', $route, $callback);
-    // }
-
-    // public function head(string $route, \Closure $callback) {
-    //     return $this->dispatch('head', $route, $callback);
-    // }
 
     public function use(\Closure $middleware) {
         return $this->middleware($middleware);
@@ -124,8 +96,6 @@ class PhpExpress {
         // echo 'PATH INFO: ' . $_SERVER['PATH_INFO'];
 
         // print_r($this->server);
-
-        
 
         $route = $this->url->path === '' ? '/' : $this->url->path;
 

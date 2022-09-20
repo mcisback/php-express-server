@@ -8,7 +8,7 @@ class Response {
         $this->headerSent = false;
         $this->responseSent = false;
         $this->headers = [];
-        $this->status = $statusCode;
+        $this->statusCode = $statusCode;
     }
 
     public function sendHeaders(bool $replace=true) {

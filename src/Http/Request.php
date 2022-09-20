@@ -6,14 +6,21 @@ class Request {
     public function __construct($phpRequest, $queryString='') {
         $this->req = $phpRequest;
         $this->_headers = getallheaders();
-        $this->_isJson = str_contains($this->_headers['Content-Type'], 'application/json');
-        $this->_wantsjson = str_contains($this->_headers['Accept'], 'application/json');
+        $this->_isJson = str_contains($this->_headers['Content-Type'] ?? '', 'application/json');
+        $this->_wantsjson = str_contains($this->_headers['Accept'] ?? '', 'application/json');
 
         $qs = [];
 
-        parse_str($queryString, $qs);
+        if(is_array($queryString)) {
+            $qs = $queryString;
+        } else {
+            parse_str($queryString, $qs);
+        }
 
-        $this->qs = $qs;
+        // print_r($qs);
+        // exit;
+
+        $this->qs = $qs ?? [];
 
         if($this->_isJson) {
             // takes raw data from the request 
@@ -27,8 +34,8 @@ class Request {
         if($key === null) {
             return $this->qs;
         }
-        
-        return $this->qs[$key] ?? null;
+
+        return $this->qs[$key] ?? '';
     }
 
     public function isJson() {
