@@ -1,0 +1,17 @@
+{
+    "name": "mcisback/php-express",
+    "description": "A Node Express.js Similar Package For PHP",
+    "type": "library",
+    "autoload": {
+        "psr-4": {
+            "Mcisback\\PhpExpress\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Mark Caggiano",
+            "email": "mcisback@gmail.com"
+        }
+    ],
+    "require": {}
+}

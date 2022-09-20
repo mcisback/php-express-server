@@ -1,0 +1,26 @@
+Create a similar sistem to express js, somethings like this:
+
+$app = new PhpExpress($_REQUEST);
+
+$app->get('/hello', function(Request $req, Response $res) {
+
+	$res->status(200)->send('Hello World');
+
+});
+
+$app->post('/login', function(Request $req, Response $res) {
+
+	$username = $req->post('username');
+	$password = $req->post('password');
+
+	$success = mysql_login($username, $password));
+	$status = $success ? 200 : 404;
+
+	return $res->status($status)->json([
+		'success' => $success,
+		'status' => $status,
+		'message' => $success ? 'Login Success' : 'Login Failed', 
+	]);
+
+
+});
