@@ -18,7 +18,8 @@ $app->use($cors);
 
 $app->get('/hello_json', function($req, $res) {
     return $res->json([
-        'message' => 'Hello, World'
+        'message' => 'Hello, World',
+        'query_string' => $req->query('param1'),
     ]);
 });
 
@@ -40,10 +41,10 @@ $app->get('/hello_html', function($req, $res) {
     ');
 });
 
-
 $app->post('/receive_json', function($req, $res) {
     return $res->json([
         'received_json' => $req->all(),
+        'query_string' => $req->query(),
     ]);
 });
 

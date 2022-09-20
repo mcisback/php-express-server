@@ -23,7 +23,11 @@ class Request {
         }
     }
 
-    public function query($key) {
+    public function query($key=null) {
+        if($key === null) {
+            return $this->qs;
+        }
+        
         return $this->qs[$key] ?? null;
     }
 

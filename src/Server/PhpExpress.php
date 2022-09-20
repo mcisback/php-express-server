@@ -7,7 +7,10 @@ use Mcisback\PhpExpress\Http\Response;
 
 class PhpExpress {
     function __construct($server, $request) {
-        $this->request = new Request($request. $server['QUERY_STRING'] ?? '');
+        // $this->isSSL = ($server['HTTPS'] ?? 'off') == 'off';
+
+        $this->host = $server['HTTP_HOST'];
+        $this->request = new Request($request, $server['QUERY_STRING'] ?? '');
         $this->response = new Response();
         $this->server = $server;
         $this->middlewares = [];
@@ -19,6 +22,15 @@ class PhpExpress {
             'delete' => [],
             'head' => [],
         ];
+    }
+
+    public function isSSL(){
+        if(isset($this->server['HTTP_X_FORWARDED_PROTO']) && $this->server['HTTP_X_FORWARDED_PROTO']=="https") {
+            return true; 
+        }
+        elseif(isset($this->server['HTTPS'])){ return true; }
+        elseif($this->server['SERVER_PORT'] == 443){ return true; }
+        else{ return false; }
     }
 
     public function dispatch(string $method, string $route, \Closure $callback) {
@@ -106,12 +118,15 @@ class PhpExpress {
 
         // print_r($this->server);
 
-        $route = $this->server['REQUEST_URI'];
-        $route = $route === '' ? '/' : $route;
+        $requestUrl = ($this->isSSL() ? 'https://' : 'http://') . $this->host . $_SERVER['REQUEST_URI'];
+
+        $url = (object) parse_url($requestUrl);
+
+        $route = $url->path === '' ? '/' : $url->path;
 
         $method = strtolower($this->server['REQUEST_METHOD']);
 
-        if(str_contains($route, '/index.php')) {
+        if(str_starts_with($route, '/index.php')) {
             $route = str_replace('/index.php', '', $route);
         }
 
