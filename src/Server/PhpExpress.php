@@ -7,33 +7,62 @@ use Mcisback\PhpExpress\Http\Response;
 
 class PhpExpress {
     function __construct($server, $request) {
-        $this->request = new Request($request);
+        $this->request = new Request($request. $server['QUERY_STRING'] ?? '');
         $this->response = new Response();
         $this->server = $server;
         $this->middlewares = [];
         $this->map = [
             'get' => [],
             'post' => [],
+            'put' => [],
+            'patch' => [],
+            'delete' => [],
+            'head' => [],
         ];
     }
 
-    public function get(string $route, \Closure $callback) {
+    public function dispatch(string $method, string $route, \Closure $callback) {
         $req = $this->request;
         $res = $this->response;
 
-        $this->map['get'][$route] = function() use ($req, $res, $callback) {
+        if(!array_key_exists($method, $this->map)) {
+            throw new \Exception("Method $method not supported");
+        }
+
+        $this->map[$method][$route] = function() use ($req, $res, $callback) {
             return $callback($req, $res);
         };
     }
 
-    public function post(string $route, \Closure $callback) {
-        $req = $this->request;
-        $res = $this->response;
-
-        $this->map['post'][$route] = function() use ($req, $res, $callback) {
-            return $callback($req, $res);
-        };
+    public function __call($method, $args) {
+        if(array_key_exists($method, $this->map)) {
+            return $this->dispatch($method, ...$args);
+        }
     }
+
+    // public function get(string $route, \Closure $callback) {
+    //     return $this->dispatch('get', $route, $callback);
+    // }
+
+    // public function post(string $route, \Closure $callback) {
+    //     return $this->dispatch('post', $route, $callback);
+    // }
+
+    // public function patch(string $route, \Closure $callback) {
+    //     return $this->dispatch('patch', $route, $callback);
+    // }
+
+    // public function put(string $route, \Closure $callback) {
+    //     return $this->dispatch('put', $route, $callback);
+    // }
+
+    // public function delete(string $route, \Closure $callback) {
+    //     return $this->dispatch('delete', $route, $callback);
+    // }
+
+    // public function head(string $route, \Closure $callback) {
+    //     return $this->dispatch('head', $route, $callback);
+    // }
 
     public function use(\Closure $middleware) {
         return $this->middleware($middleware);

@@ -41,4 +41,11 @@ $app->get('/hello_html', function($req, $res) {
 });
 
 
+$app->post('/receive_json', function($req, $res) {
+    return $res->json([
+        'received_json' => $req->all(),
+    ]);
+});
+
+
 $app->run();

@@ -3,11 +3,17 @@
 namespace Mcisback\PhpExpress\Http;
 
 class Request {
-    public function __construct($phpRequest) {
+    public function __construct($phpRequest, $queryString='') {
         $this->req = $phpRequest;
         $this->_headers = getallheaders();
         $this->_isJson = str_contains($this->_headers['Content-Type'], 'application/json');
         $this->_wantsjson = str_contains($this->_headers['Accept'], 'application/json');
+
+        $qs = [];
+
+        parse_str($queryString, $qs);
+
+        $this->qs = $qs;
 
         if($this->_isJson) {
             // takes raw data from the request 
@@ -15,6 +21,10 @@ class Request {
             // Converts it into a PHP object 
             $this->req = json_decode($json, true);
         }
+    }
+
+    public function query($key) {
+        return $this->qs[$key] ?? null;
     }
 
     public function isJson() {
