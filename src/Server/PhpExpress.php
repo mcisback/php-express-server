@@ -9,9 +9,9 @@ class PhpExpress {
     function __construct($server, $request) {
         // $this->isSSL = ($server['HTTPS'] ?? 'off') == 'off';
 
+        
+
         $this->host = $server['HTTP_HOST'];
-        $this->request = new Request($request, $server['QUERY_STRING'] ?? '');
-        $this->response = new Response();
         $this->server = $server;
         $this->middlewares = [];
         $this->map = [
@@ -22,6 +22,13 @@ class PhpExpress {
             'delete' => [],
             'head' => [],
         ];
+
+        $requestUrl = ($this->isSSL() ? 'https://' : 'http://') . $this->host . $_SERVER['REQUEST_URI'];
+
+        $this->url = (object) parse_url($requestUrl);
+
+        $this->request = new Request($request, $this->url->query);
+        $this->response = new Response();
     }
 
     public function isSSL(){
@@ -118,11 +125,9 @@ class PhpExpress {
 
         // print_r($this->server);
 
-        $requestUrl = ($this->isSSL() ? 'https://' : 'http://') . $this->host . $_SERVER['REQUEST_URI'];
+        
 
-        $url = (object) parse_url($requestUrl);
-
-        $route = $url->path === '' ? '/' : $url->path;
+        $route = $this->url->path === '' ? '/' : $this->url->path;
 
         $method = strtolower($this->server['REQUEST_METHOD']);
 
