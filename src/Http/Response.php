@@ -56,8 +56,8 @@ class Response {
         return $this;
     }
 
-    public function headers(array $headers) {
-        $this->headers = [...$this->headers, ...$headers];
+    public function headers(array $headers, bool $append=true) {
+        $this->headers = $append === true ? [...$this->headers, ...$headers] : $headers;
 
         return $this;
     }
