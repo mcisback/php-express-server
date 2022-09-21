@@ -16,6 +16,14 @@ $cors = function (&$req, &$res, \Closure $next) {
 
 $app->use($cors);
 
+$app->get('/hello_pattern/?(\d*)/?(\d*)', function($req, $res, ...$params) {
+    return $res->json([
+        'message' => 'Hello, World',
+        'query_string' => $req->query(),
+        'id' => $params,
+    ]);
+});
+
 $app->get('/hello_json', function($req, $res) {
     return $res->json([
         'message' => 'Hello, World',

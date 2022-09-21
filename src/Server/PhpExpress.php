@@ -19,6 +19,8 @@ class PhpExpress {
             'head' => [],
         ];
 
+        $this->routeParams = [];
+
         $this->url = (object) parse_url(
             ($this->isSSL() ? 'https://' : 'http://') . $this->host . $this->server['REQUEST_URI']
         );
@@ -39,13 +41,14 @@ class PhpExpress {
     public function dispatch(string $method, string $route, \Closure $callback) {
         $req = $this->request;
         $res = $this->response;
+        // $params = $this->routeParams;
 
         if(!array_key_exists($method, $this->map)) {
             throw new \Exception("Method $method not supported");
         }
 
-        $this->map[$method][$route] = function() use ($req, $res, $callback) {
-            return $callback($req, $res);
+        $this->map[$method][$route] = function(array $params=[]) use ($req, $res, $callback) {
+            return $callback($req, $res, ...$params);
         };
     }
 
@@ -105,6 +108,8 @@ class PhpExpress {
             $route = str_replace('/index.php', '', $route);
         }
 
+        // $params = preg_match($pattern, $route, $matches) ?? [];
+
         // echo "ROUTE: {$this->server['REQUEST_URI']} $route";
 
         // echo "<br>";
@@ -119,64 +124,70 @@ class PhpExpress {
 
         // var_dump(!isset($this->map[$method][$route]));
 
-        if(!isset($this->map[$method])) {
-            $this->response->status(403);
-
-            if($this->request->wantsJson()) {
-                return $this->response->json([
-                    'success' => false,
-                    'status' => 'error',
-                    'message' => 'Method Not Found'
-                ]);
-            }
-
-            return $this->response->html('
-                <!DOCTYPE html>
-                <html lang="en">
-                <head>
-                    <meta charset="UTF-8">
-                    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <title>Not Found</title>
-                </head>
-                <body>
-                    <h1>Error 403</h1>
-                    <h2>Method Not Found</h2>
-                </body>
-                </html>
-            ');
-        }
-
-        if(!isset($this->map[$method][$route])) {
-            $this->response->status(404);
-
-            if($this->request->wantsJson()) {
-                return $this->response->json([
-                    'success' => false,
-                    'status' => 'error',
-                    'message' => 'Route Not Found'
-                ]);
-            }
-
-            return $this->response->html('
-                <!DOCTYPE html>
-                <html lang="en">
-                <head>
-                    <meta charset="UTF-8">
-                    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <title>Not Found</title>
-                </head>
-                <body>
-                    <h1>Error 404</h1>
-                    <h2>Route Not Found</h2>
-                </body>
-                </html>
-            ');
-        }
-
         $this->runMiddlewares();
 
-        return $this->map[$method][$route]();
+        return $this->matchRoute($route, $method);
+    }
+
+    public function printError($statusCode, $errorMessage) {
+        $this->response->status($statusCode);
+
+        if($this->request->wantsJson()) {
+            return $this->response->json([
+                'success' => false,
+                'status' => 'error',
+                'httpStatus' => $statusCode,
+                'message' => $errorMessage
+            ]);
+        }
+
+        return $this->response->html('
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta http-equiv="X-UA-Compatible" content="IE=edge">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Not Found</title>
+            </head>
+            <body>
+                <h1>Error '.$statusCode.'</h1>
+                <h2>'.$errorMessage.'</h2>
+            </body>
+            </html>
+        ');
+    }
+
+    public function print403() {
+        return $this->printError(403, 'Method Not Found');
+    }
+
+    public function print404() {
+        return $this->printError(404, 'Route Not Found');
+    }
+
+    public function matchRoute($route, $method) {
+
+        foreach ($this->map[$method] as $candidate => $closure) {
+            // echo "$candidate: $route";
+            // echo "<br />";
+
+            if(preg_match("%$candidate%", $route, $params)){
+                // echo "MATCH !";
+                // echo "<br />";
+                
+                // print_r($params);
+
+                // $this->routeParams = $params;
+
+                if(is_array($params) && count($params) >= 2) {
+                    array_shift($params);
+                } else {
+                    $params = [];
+                }
+
+                return $closure($params);
+            }
+        }
     }
 }
