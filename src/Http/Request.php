@@ -11,6 +11,8 @@ class Request {
         $this->_headers = getallheaders();
         $this->_isJson = str_contains($this->_headers['Content-Type'] ?? '', 'application/json');
         $this->_wantsjson = str_contains($this->_headers['Accept'] ?? '', 'application/json');
+        $this->_bearer = null;
+        $this->_data = [];
 
         $this->url = (object) parse_url(
             ($this->isSSL() ? 'https://' : 'http://') . $this->host . $this->server['REQUEST_URI']
@@ -35,6 +37,48 @@ class Request {
             // Converts it into a PHP object 
             $this->req = json_decode($json, true);
         }
+    }
+
+    public function __call($methodName, $args) {
+        if(array_key_exists($methodName, $this->_data)) {
+            $tmp = $this->data($methodName);
+            
+            if(is_callable($tmp)) {
+                return $tmp(...$args);
+            }
+
+            return $tmp;
+        }
+    }
+
+    public function register(string $key, $value) {
+        return $this->data($key, $value);
+    }
+
+    public function data(string $key=null, $value=null) {
+        if($key === null && $value === null){
+            return $this->_data;
+        }
+
+        if($value === null) {
+            return $this->_data[$key] ?? null;
+        }
+
+        $this->_data[$key] = $value;
+     }
+
+    public function bearer(string $header='Authorization', string $pattern='/\s*Bearer\s*(.+)$/') {
+        if($this->bearer === null) {
+            if($this->hasHeader($header)) {
+                $auth = $this->header($header);
+    
+                if(preg_match($pattern, $auth, $matches)) {
+                    $this->_bearer = $matches[1] ?? null;
+                }
+            }
+        }
+
+        return $this->bearer;
     }
 
     public function method() {

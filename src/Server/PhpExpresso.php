@@ -6,8 +6,7 @@ use Mcisback\PhpExpresso\Http\Request;
 use Mcisback\PhpExpresso\Http\Response;
 
 class PhpExpresso {
-    function __construct($server, $request) {
-        $this->server = $server;
+    function __construct(array $server, array $request) {
         $this->middlewares = [];
         $this->map = [
             'get' => [],
@@ -18,16 +17,23 @@ class PhpExpresso {
             'head' => [],
         ];
 
-        // $this->routeParams = [];
+        $this->session = null;
 
-        $this->request = new Request($this->server, $request);
+        $this->request = new Request($server, $request);
         $this->response = new Response();
+    }
+    
+    public function session($session=null) {
+        if($session === null) {
+            return $this->session;
+        }
+
+        $this->session = $session;
     }
 
     public function dispatch(string $method, string $route, \Closure $callback) {
         $req = $this->request;
         $res = $this->response;
-        // $params = $this->routeParams;
 
         if(!array_key_exists($method, $this->map)) {
             throw new \Exception("Method $method not supported");
@@ -52,20 +58,10 @@ class PhpExpresso {
         $this->middlewares[] = $middleware;
     }
 
-    // public function next() {
-    //     // foreach ($this->middlewares as $middleware) {
-    //     //     yield $middleware;
-    //     // }
-
-    //     return next($this->middlewares);
-    // }
-
     protected function runMiddlewares() {
         if(count($this->middlewares) === 0) {
             return false;
         }
-
-        // print_r($this->middlewares);
 
         $middleware = current($this->middlewares);
         $middlewares = $this->middlewares;
@@ -82,33 +78,13 @@ class PhpExpresso {
     }
 
     public function run() {
-        // echo 'PATH INFO: ' . $_SERVER['PATH_INFO'];
-
-        // print_r($this->server);
-
         $route = $this->request->url()->path === '' ? '/' : $this->request->url()->path;
 
         if(str_starts_with($route, '/index.php')) {
             $route = str_replace('/index.php', '', $route);
         }
 
-        // Serve statics here ?
-
-        // $params = preg_match($pattern, $route, $matches) ?? [];
-
-        // echo "ROUTE: {$this->server['REQUEST_URI']} $route";
-
-        // echo "<br>";
-
-        // print_r($this->map[$method]);
-
-        // echo "<br>";
-        // echo "<br>";
-        // echo "<br>";
-
-        // print_r($this->map[$method][$route]);
-
-        // var_dump(!isset($this->map[$method][$route]));
+        // Serve statics dirs here ?
 
         $this->runMiddlewares();
 
@@ -152,19 +128,11 @@ class PhpExpresso {
         return $this->printError(404, 'Route Not Found');
     }
 
-    public function matchRoute($route, $method) {
+    public function matchRoute(string $route, string $method) {
 
         foreach ($this->map[$method] as $candidate => $closure) {
-            // echo "$candidate: $route";
-            // echo "<br />";
 
             if(preg_match("%$candidate%", $route, $params)){
-                // echo "MATCH !";
-                // echo "<br />";
-                
-                // print_r($params);
-
-                // $this->routeParams = $params;
 
                 if(is_array($params) && count($params) >= 2) {
                     array_shift($params);

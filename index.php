@@ -2,9 +2,12 @@
 
 require_once __DIR__ . '/vendor/autoload.php';
 
+use Mcisback\PhpExpresso\Server\PhpExpresso;
+use Mcisback\PhpExpresso\Http;
 
-$app = new Mcisback\PhpExpresso\Server\PhpExpresso($_SERVER, $_REQUEST);
+$app = new PhpExpresso($_SERVER, $_REQUEST);
 
+// Use Middlewares Like This:
 $cors = function (&$req, &$res, \Closure $next) {
     $res->headers([
         "Access-Control-Allow-Origin" => "*",
@@ -16,20 +19,54 @@ $cors = function (&$req, &$res, \Closure $next) {
 
 $app->use($cors);
 
+// Or Like This:
+
+$app->use(function (&$req, &$res, \Closure $next) {
+    // Use your own session driver
+    $req->register('session', new Http\Session());
+
+    $token = $req->bearer() ?? null;
+
+    if($token !== null) {
+        $req->session()->set('token', $token);
+        $req->session()->set('loggedIn', 'yes');
+    }
+    
+    $req->register('isLoggedIn', function() use(&$req) {
+        return $req->session()->get('loggedIn') === true;
+    });
+
+    $next($req, $res, $next);
+});
+
+$app->get('/session', function($req, $res) {
+    return $res->json([
+        'message' => 'Hello, World',
+        'bearer' => $req->bearer(),
+        'session' => $req->session(),
+        'loggedIn' => $req->session()->get('loggedIn'),
+        'isLoggedIn' => $req->isLoggedIn(),
+    ]);
+});
+
+
+// Serve Static Files
 $app->get('/errors/([^\.]+\.\w+)', function($req, $res, $fileName) {
     return $res->html(
         file_get_contents(__DIR__ . '/resources/views/errors/' . $fileName)
     );
 });
 
-$app->get('/hello_pattern/?(\d*)/?(\d*)', function($req, $res, ...$params) {
+// Match Patterns
+$app->get('/hello_pattern/?(\d*)', function($req, $res, $id) {
     return $res->json([
         'message' => 'Hello, World',
         'query_string' => $req->query(),
-        'id' => $params,
+        'id' => $id,
     ]);
 });
 
+// Serve JSON And Read QueryString
 $app->get('/hello_json', function($req, $res) {
     return $res->json([
         'message' => 'Hello, World',
@@ -37,6 +74,7 @@ $app->get('/hello_json', function($req, $res) {
     ]);
 });
 
+// Server HTML
 $app->get('/hello_html', function($req, $res) {
     return $res->html('
         <!DOCTYPE html>
@@ -55,6 +93,7 @@ $app->get('/hello_html', function($req, $res) {
     ');
 });
 
+// Receive and process JSON Data
 $app->post('/receive_json', function($req, $res) {
     return $res->json([
         'received_json' => $req->all(),
@@ -62,5 +101,5 @@ $app->post('/receive_json', function($req, $res) {
     ]);
 });
 
-
+// Run App
 $app->run();
