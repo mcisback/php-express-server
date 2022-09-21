@@ -9,12 +9,12 @@ class ComposerStaticInit4b6e0abd5e4e270a20bce7683e936f20
     public static $prefixLengthsPsr4 = array (
         'M' => 
         array (
-            'Mcisback\\PhpExpress\\' => 20,
+            'Mcisback\\PhpExpresso\\' => 21,
         ),
     );
 
     public static $prefixDirsPsr4 = array (
-        'Mcisback\\PhpExpress\\' => 
+        'Mcisback\\PhpExpresso\\' => 
         array (
             0 => __DIR__ . '/../..' . '/src',
         ),

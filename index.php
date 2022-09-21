@@ -3,7 +3,7 @@
 require_once __DIR__ . '/vendor/autoload.php';
 
 
-$app = new Mcisback\PhpExpress\Server\PhpExpress($_SERVER, $_REQUEST);
+$app = new Mcisback\PhpExpresso\Server\PhpExpresso($_SERVER, $_REQUEST);
 
 $cors = function (&$req, &$res, \Closure $next) {
     $res->headers([
@@ -15,6 +15,12 @@ $cors = function (&$req, &$res, \Closure $next) {
 };
 
 $app->use($cors);
+
+$app->get('/errors/([^\.]+\.\w+)', function($req, $res, $fileName) {
+    return $res->html(
+        file_get_contents(__DIR__ . '/resources/views/errors/' . $fileName)
+    );
+});
 
 $app->get('/hello_pattern/?(\d*)/?(\d*)', function($req, $res, ...$params) {
     return $res->json([

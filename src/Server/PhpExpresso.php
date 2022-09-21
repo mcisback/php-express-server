@@ -1,13 +1,12 @@
 <?php
 
-namespace Mcisback\PhpExpress\Server;
+namespace Mcisback\PhpExpresso\Server;
 
-use Mcisback\PhpExpress\Http\Request;
-use Mcisback\PhpExpress\Http\Response;
+use Mcisback\PhpExpresso\Http\Request;
+use Mcisback\PhpExpresso\Http\Response;
 
-class PhpExpress {
+class PhpExpresso {
     function __construct($server, $request) {
-        $this->host = $server['HTTP_HOST'];
         $this->server = $server;
         $this->middlewares = [];
         $this->map = [
@@ -19,23 +18,10 @@ class PhpExpress {
             'head' => [],
         ];
 
-        $this->routeParams = [];
+        // $this->routeParams = [];
 
-        $this->url = (object) parse_url(
-            ($this->isSSL() ? 'https://' : 'http://') . $this->host . $this->server['REQUEST_URI']
-        );
-
-        $this->request = new Request($request, $this->url->query ?? '');
+        $this->request = new Request($this->server, $request);
         $this->response = new Response();
-    }
-
-    public function isSSL(){
-        if(isset($this->server['HTTP_X_FORWARDED_PROTO']) && $this->server['HTTP_X_FORWARDED_PROTO']=="https") {
-            return true; 
-        }
-        elseif(isset($this->server['HTTPS'])){ return true; }
-        elseif($this->server['SERVER_PORT'] == 443){ return true; }
-        else{ return false; }
     }
 
     public function dispatch(string $method, string $route, \Closure $callback) {
@@ -100,13 +86,13 @@ class PhpExpress {
 
         // print_r($this->server);
 
-        $route = $this->url->path === '' ? '/' : $this->url->path;
-
-        $method = strtolower($this->server['REQUEST_METHOD']);
+        $route = $this->request->url()->path === '' ? '/' : $this->request->url()->path;
 
         if(str_starts_with($route, '/index.php')) {
             $route = str_replace('/index.php', '', $route);
         }
+
+        // Serve statics here ?
 
         // $params = preg_match($pattern, $route, $matches) ?? [];
 
@@ -126,7 +112,7 @@ class PhpExpress {
 
         $this->runMiddlewares();
 
-        return $this->matchRoute($route, $method);
+        return $this->matchRoute($route, $this->request->method());
     }
 
     public function printError($statusCode, $errorMessage) {

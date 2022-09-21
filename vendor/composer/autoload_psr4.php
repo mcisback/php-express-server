@@ -6,5 +6,5 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
-    'Mcisback\\PhpExpress\\' => array($baseDir . '/src'),
+    'Mcisback\\PhpExpresso\\' => array($baseDir . '/src'),
 );
