@@ -1,9 +1,11 @@
 <?php
 
-require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/../vendor/autoload.php';
 
 use PhpExpresso\Server\PhpExpresso;
 use PhpExpresso\Http;
+use PhpExpresso\Router\Router;
+use function App\Api\ApiRouter\getRouter as getApiRouter;
 
 $app = new PhpExpresso();
 
@@ -17,7 +19,7 @@ $cors = function (&$req, &$res, \Closure $next) {
     $next($req, $res, $next);
 };
 
-$app->use($cors);
+$app->use(handler: $cors);
 
 // Or Like This:
 
@@ -100,6 +102,8 @@ $app->post('/receive_json', function($req, $res) {
         'query_string' => $req->query(),
     ]);
 });
+
+$app->use('/api', getApiRouter);
 
 // Run App
 $app->run();
