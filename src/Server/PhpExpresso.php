@@ -6,7 +6,7 @@ use PhpExpresso\Http\Request;
 use PhpExpresso\Http\Response;
 
 class PhpExpresso {
-    function __construct(array $server, array $request) {
+    function __construct() {
         $this->middlewares = [];
         $this->map = [
             'get' => [],
@@ -19,7 +19,7 @@ class PhpExpresso {
 
         $this->session = null;
 
-        $this->request = new Request($server, $request);
+        $this->request = new Request($_SERVER, $_REQUEST);
         $this->response = new Response();
     }
     

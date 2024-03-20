@@ -5,7 +5,7 @@ require_once __DIR__ . '/vendor/autoload.php';
 use PhpExpresso\Server\PhpExpresso;
 use PhpExpresso\Http;
 
-$app = new PhpExpresso($_SERVER, $_REQUEST);
+$app = new PhpExpresso();
 
 // Use Middlewares Like This:
 $cors = function (&$req, &$res, \Closure $next) {
