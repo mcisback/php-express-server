@@ -1,6 +1,6 @@
 <?php
 
-namespace Mcisback\PhpExpresso\Http;
+namespace PhpExpresso\Http;
 
 class Response {
     public function __construct($statusCode=200) {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Mcisback\PhpExpresso\Http;
+namespace PhpExpresso\Http;
 
 class Session {
     public function __construct() {

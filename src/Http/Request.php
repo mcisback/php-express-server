@@ -1,6 +1,6 @@
 <?php
 
-namespace Mcisback\PhpExpresso\Http;
+namespace PhpExpresso\Http;
 
 class Request {
     public function __construct(array $server, array $phpRequest) {

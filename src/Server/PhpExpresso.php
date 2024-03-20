@@ -1,9 +1,9 @@
 <?php
 
-namespace Mcisback\PhpExpresso\Server;
+namespace PhpExpresso\Server;
 
-use Mcisback\PhpExpresso\Http\Request;
-use Mcisback\PhpExpresso\Http\Response;
+use PhpExpresso\Http\Request;
+use PhpExpresso\Http\Response;
 
 class PhpExpresso {
     function __construct(array $server, array $request) {

@@ -8,7 +8,7 @@ to build quick tools and APIs.
 ```php
 require_once __DIR__ . '/vendor/autoload.php';
 
-$app = new Mcisback\PhpExpresso\Server\PhpExpresso($_SERVER, $_REQUEST);
+$app = new PhpExpresso\Server\PhpExpresso($_SERVER, $_REQUEST);
 
 // Use Middlewares Like This:
 $cors = function (&$req, &$res, \Closure $next) {

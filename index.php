@@ -2,8 +2,8 @@
 
 require_once __DIR__ . '/vendor/autoload.php';
 
-use Mcisback\PhpExpresso\Server\PhpExpresso;
-use Mcisback\PhpExpresso\Http;
+use PhpExpresso\Server\PhpExpresso;
+use PhpExpresso\Http;
 
 $app = new PhpExpresso($_SERVER, $_REQUEST);
 
