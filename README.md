@@ -5,7 +5,7 @@ to build quick tools and APIs.
 
 ## Usage
 
-```
+```php
 require_once __DIR__ . '/vendor/autoload.php';
 
 $app = new Mcisback\PhpExpresso\Server\PhpExpresso($_SERVER, $_REQUEST);
